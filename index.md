@@ -1,37 +1,12 @@
-## Welcome to GitHub Pages
+## Predicting vehicles sale using xgboost
 
-You can use the [editor on GitHub](https://github.com/sir1209/349-project/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+Tan Li, litan1209@qq.com
+EECS 349: Machine Learning, Northwestern University
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Abstract
 
-### Markdown
+The main purpose of this project is to use machine learning tools to predict the sale of vehicles based on their previous sale. Such topic could be meaningful in several ways. for example, as we are the dealer, knowing the possible trend of the total sale of different vehicles in the next few months could help us manage the stock better. Moreover, by knowing what kind of cars are being more popular among the customers, the manufacturer could spend more resource on designing and producing cars with similar properties. 
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+In this work, a popular ensemble model, xgboost is applied on features including the vehicle information such as height and weight as well as some context information like when the car is sold. The key of xgboost’s outstanding performance was studied. The xgboost model with best parameters could overrun the baseline (the average sale) by 18.6% on root-mean-square error(rmse). The xgboost offers a function named get_fscore(). By calling this function on the as-trained model, one can see which of the features are used most frequently on which the tree nodes split. In the dataset used in this work, features with highest importance are sale from past 3 months, on which month or year the car is sold and the quality and the height of the car. The sum of predict sale of each month and that of the true value are shown in figure 1.
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/sir1209/349-project/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+![figure 1. The sum of predict sale of each month and that of the true value]
