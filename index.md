@@ -9,8 +9,7 @@ The main purpose of this project is to use machine learning tools to predict the
 
 In this work, a popular ensemble model, xgboost is applied on features including the vehicle information such as height and weight as well as some context information like when the car is sold. The key of xgboost’s outstanding performance was studied. The xgboost model with best parameters could overrun the baseline (the average sale) by 18.6% on root-mean-square error(rmse). The xgboost offers a function named get_fscore(). By calling this function on the as-trained model, one can see which of the features are used most frequently on which the tree nodes split. In the dataset used in this work, features with highest importance are sale from past 3 months, on which month or year the car is sold and the quality and the height of the car. The sum of predict sale of each month and that of the true value are shown in figure 1.  
 
-![figure 1. The sum of predict sale of each month and that of the true value]
-(http://chuantu.biz/t6/330/1529286645x-1404793190.png)  
+![figure 1. The sum of predict sale of each month and that of the true value](http://chuantu.biz/t6/330/1529286645x-1404793190.png)  
 
 ### Study of Xgoost 
 
@@ -52,16 +51,16 @@ The best parameters for this task is:
 This model achieves a rmse of 136.59 on test set. By watching the difference between predictions and true targets, one can find one clear error pattern. Those vehicles whose real sale is zero are commonly predicted to have a sale of no more than 50. So a little adjustment is made to the model. A threshold is set. If the prediction is not larger than 50, then the result will be set to 0. This modification reduces the rmse further to 131.62. This result overruns the baseline using average sale as prediction which equals to 161.76 by 18.6%.  
 
 The most important features are shown below:  
-Feature|Feature importance  
--------|------------------  
-Sale of 1 month ago|239  
-Sale of 2 months ago|175  
-Sale of 3 months ago|132  
-The sale month|28  
-The sale year|27  
-Equipment_quality|23  
-Car_height|21  
-Total_quality|21  
+Feature | Feature importance  
+------- | ------------------  
+Sale of 1 month ago | 239  
+Sale of 2 months ago | 175  
+Sale of 3 months ago | 132  
+The sale month | 28  
+The sale year | 27  
+Equipment_quality | 23  
+Car_height | 21  
+Total_quality | 21  
 
 ### What’s next
 
