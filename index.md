@@ -1,12 +1,68 @@
 ## Predicting vehicles sale using xgboost
 
-Tan Li, litan1209@qq.com
+Tan Li, litan1209@qq.com  
 EECS 349: Machine Learning, Northwestern University
 
 ### Abstract
 
 The main purpose of this project is to use machine learning tools to predict the sale of vehicles based on their previous sale. Such topic could be meaningful in several ways. for example, as we are the dealer, knowing the possible trend of the total sale of different vehicles in the next few months could help us manage the stock better. Moreover, by knowing what kind of cars are being more popular among the customers, the manufacturer could spend more resource on designing and producing cars with similar properties. 
 
-In this work, a popular ensemble model, xgboost is applied on features including the vehicle information such as height and weight as well as some context information like when the car is sold. The key of xgboost’s outstanding performance was studied. The xgboost model with best parameters could overrun the baseline (the average sale) by 18.6% on root-mean-square error(rmse). The xgboost offers a function named get_fscore(). By calling this function on the as-trained model, one can see which of the features are used most frequently on which the tree nodes split. In the dataset used in this work, features with highest importance are sale from past 3 months, on which month or year the car is sold and the quality and the height of the car. The sum of predict sale of each month and that of the true value are shown in figure 1.
+In this work, a popular ensemble model, xgboost is applied on features including the vehicle information such as height and weight as well as some context information like when the car is sold. The key of xgboost’s outstanding performance was studied. The xgboost model with best parameters could overrun the baseline (the average sale) by 18.6% on root-mean-square error(rmse). The xgboost offers a function named get_fscore(). By calling this function on the as-trained model, one can see which of the features are used most frequently on which the tree nodes split. In the dataset used in this work, features with highest importance are sale from past 3 months, on which month or year the car is sold and the quality and the height of the car. The sum of predict sale of each month and that of the true value are shown in figure 1.  
 
 ![figure 1. The sum of predict sale of each month and that of the true value]
+(http://chuantu.biz/t6/330/1529286645x-1404793190.png)  
+
+### Study of Xgoost 
+
+Xgboost is being widely used recently in a variety of machine learning applications, including competitions, industries and researches. It’s an ensemble model based on decision trees. One of the most significant difference between xgboost and older tree boosting models, such as GBDT, is that, at each iteration, xgboost chooses the target based on a second order Taylor expansion of the loss function, whereas GBDT uses a first order Taylor expansion, i.e. the gradient as target. This allows xgboost to converge faster than GBDT. 
+
+Another key feature of xgboost is that the model includes two regularization terms in the default loss function. One is a L2 norm of the score of each leaves, the other is proportional to the number of leaves. The former one is to shrink the scores so that they would be smoother and there would be more left for the following trees to learn. The latter one is used to do the pruning. But the details are not included in the paper published in 2016. After going through the source code posted on GitHub, one can find that each tree of xgboost first fully grows to the max depth and then followed by a post-pruning using this term, by default.
+
+The work of xgboost also includes an innovated way to deal with huge amount of data, namely the weighted percentile approximation. By rewriting the formula, the loss function could be regarded as a square loss on samples whose weights are their second derivative. Then the GK summary framework is applied on the weighted samples. GK summary is an algorithm to find the approximate histogram of big data. By modifying GK summary with weight, xgboost is able to deal with a huge amount of data.
+
+### Data preprocess
+
+The data is acquired from Tianchi website, a Chinese data science website. At a first glance, the data is well cleaned already, with only 7 missing values among all 18548 data and 31 original features. Since xgboost is able to deal with missing value by putting all of them to the branch that achieves a lower loss, no special process is applied to these missing values. 
+
+The sale in Dec. and Jan. are much higher than the other months. The possible cause is that people get bonus from their work at the end of the year and buy themselves a car as new year gift. These data are not selected since we are going to predict the sale in normal months.
+
+Some data generation technique is performed here. There is one feature named ‘sale_date’ in the data set. If the sale is in July, 2017, then this attribute of the sample will be 201707. Two new features named ‘sale_month’ and ‘sale_year’ are generated by subtracting the information from ‘sale_date’. The sale from past three months are also added as new features in order to reflect a recent change. The ‘area_of_car’ and ‘volume of car’ are generated by multiplying ‘length’ and ‘width’, ‘length’ and ‘width’ and ‘height’ correspondingly. Also, data from other resources were collected and tried out. Many reports in the relevant areas mentioned that GDP influences the car sale significantly. And the fluctuation in gas price also has some effect. However, GDP are always calculated by year, while our data here is by month. So only gas price change is used here. 
+
+Before feeding data into models, one hot encoding are applied. This is because xgboost treats all features as numerical features, so the order of labels may cause error if not one hot encoded.
+
+### Model training
+The sale on and after Aug., 2017 are used as test data. The parameter tuning is done using a 5-fold cv on train data, with the learning rate fixed to its default value.
+
+The most important parameters of xgboost are max_depth and min_child_weight. The former one decides how deep one tree can split to in one iteration, and the latter one determines the minimum number of samples one leaf must contain. These two parameters are tuned together by grid search. A larger step is firstly chosen, then a smaller step is applied around the best point.
+
+Another two parameters that are tuned following is ‘subsample’ and ‘colsample_bytree’. These two add randomization into the model so that it could be more robust. These two parameters are also tuned by grid search.
+
+The last two concerned parameters are ‘alpha’ and ‘lambda’. They represent the strength of regularization. These two parameters are tuned using an exponential random search overnight. 
+
+### Result
+The best parameters for this task is:
+* max_depth: 5
+* min_child_weight: 13
+* subsample: 1
+* colsample_bytree: 0.9
+* alpha: 0.042
+* lambda: 4.17
+* num of trees:110
+
+This model achieves a rmse of 136.59 on test set. By watching the difference between predictions and true targets, one can find one clear error pattern. Those vehicles whose real sale is zero are commonly predicted to have a sale of no more than 50. So a little adjustment is made to the model. A threshold is set. If the prediction is not larger than 50, then the result will be set to 0. This modification reduces the rmse further to 131.62. This result overruns the baseline using average sale as prediction which equals to 161.76 by 18.6%.  
+
+The most important features are shown below:  
+Feature|Feature importance  
+-------|------------------  
+Sale of 1 month ago|239  
+Sale of 2 months ago|175  
+Sale of 3 months ago|132  
+The sale month|28  
+The sale year|27  
+Equipment_quality|23  
+Car_height|21  
+Total_quality|21  
+
+### What’s next
+
+A common way to improve accuracy is to ensemble models together, such as taking an average over xgboosts with similar performance but different parameters. Also, the result shows that the sale from past months are of great importance. Maybe including RNN in the ensemble could help.
